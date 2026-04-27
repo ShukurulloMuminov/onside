@@ -225,7 +225,7 @@ class TeamInvitationSendView(APIView):
 
         player_id = request.data.get('player_id')
         try:
-            player = User.objects.get(pk=player_id, role='player')
+            player = User.objects.get(pk=player_id)
         except User.DoesNotExist:
             return Response({'error': 'O\'yinchi topilmadi'}, status=status.HTTP_404_NOT_FOUND)
 
