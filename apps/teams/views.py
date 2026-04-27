@@ -14,6 +14,7 @@ from .serializers import (
     TeamInvitationSerializer,
     InvitationResponseSerializer,
     AddPlayerToTeamSerializer,
+    TeamInviteSerializer,
 )
 from apps.accounts.permissions import IsTournamentAdmin
 from apps.accounts.models import User
@@ -208,10 +209,6 @@ class TeamChangeCaptainView(APIView):
 # ============================================================
 
 class TeamInvitationSendView(APIView):
-    """
-    POST /api/v1/teams/{id}/invite/
-    O'yinchini jamoaga taklif qilish (captain)
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
@@ -223,7 +220,10 @@ class TeamInvitationSendView(APIView):
         if team.captain != request.user and not request.user.is_tournament_admin:
             return Response({'error': 'Faqat sardor taklif yuborishishi mumkin'}, status=status.HTTP_403_FORBIDDEN)
 
-        player_id = request.data.get('player_id')
+        serializer = TeamInviteSerializer(data=request.data)  # ← qo'shing
+        serializer.is_valid(raise_exception=True)             # ← qo'shing
+        player_id = serializer.validated_data['player_id']    # ← o'zgartiring
+
         try:
             player = User.objects.get(pk=player_id)
         except User.DoesNotExist:
@@ -240,7 +240,7 @@ class TeamInvitationSendView(APIView):
             team=team,
             invited_by=request.user,
             invited_player=player,
-            message=request.data.get('message', '')
+            message=serializer.validated_data.get('message', '')  # ← o'zgartiring
         )
         return Response(TeamInvitationSerializer(invitation).data, status=status.HTTP_201_CREATED)
 

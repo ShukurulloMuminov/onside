@@ -70,3 +70,8 @@ class AddPlayerToTeamSerializer(serializers.Serializer):
         default='player'
     )
     jersey_number = serializers.IntegerField(required=False, allow_null=True)
+
+
+class TeamInviteSerializer(serializers.Serializer):
+    player_id = serializers.IntegerField()
+    message = serializers.CharField(required=False, default='')
