@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 
 from .models import Team, TeamMembership, TeamInvitation
 from .serializers import (
@@ -15,6 +16,7 @@ from .serializers import (
     InvitationResponseSerializer,
     AddPlayerToTeamSerializer,
     TeamInviteSerializer,
+
 )
 from apps.accounts.permissions import IsTournamentAdmin
 from apps.accounts.models import User
@@ -211,6 +213,7 @@ class TeamChangeCaptainView(APIView):
 class TeamInvitationSendView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(request=TeamInviteSerializer)
     def post(self, request, pk):
         try:
             team = Team.objects.get(pk=pk)
