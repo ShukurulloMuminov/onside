@@ -367,7 +367,6 @@ class GlobalLeaderboardView(APIView):
             })
         return Response(results)
 
-
 class MyStatsView(APIView):
     """
     GET /api/v1/statistics/my-stats/
@@ -376,7 +375,6 @@ class MyStatsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        from apps.matches.views import PlayerProfileStatsView
         view = PlayerProfileStatsView()
         view.request = request
         return view.get(request, request.user.id)
