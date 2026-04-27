@@ -15,13 +15,15 @@ class TeamMembershipSerializer(serializers.ModelSerializer):
 
 class TeamListSerializer(serializers.ModelSerializer):
     captain_name = serializers.CharField(source='captain.full_name', read_only=True)
-    players_count = serializers.ReadOnlyField()
+    players_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Team
         fields = ['id', 'name', 'short_name', 'logo', 'city',
                   'captain_name', 'players_count', 'is_active', 'created_at']
 
+    def get_players_count(self, obj):
+        return obj.memberships.filter(is_active=True).count()
 
 class TeamDetailSerializer(serializers.ModelSerializer):
     captain = UserListSerializer(read_only=True)
