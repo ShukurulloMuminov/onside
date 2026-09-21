@@ -1,0 +1,15 @@
+{$DOMAIN} {
+	encode gzip
+
+	# Django owns these paths — API, admin panel, and everything it serves
+	# directly (collected static assets, uploaded media). Everything else
+	# goes to the Next.js frontend.
+	@backend path /api/* /admin* /static/* /media/*
+	handle @backend {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

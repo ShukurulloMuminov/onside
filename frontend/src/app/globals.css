@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f6fb;
+  --surface: #ffffff;
+  --foreground: #0f1b33;
+  --muted: #64748b;
+  --border: #e3e8f2;
+  --navy: #0a2044;
+  --navy-deep: #051225;
+  --blue: #0060c8;
+  --blue-dark: #00478f;
+  --blue-light: #e8f1fd;
+  --accent: #17c9e6;
+  --win: #0f9d58;
+  --draw: #d97706;
+  --loss: #dc2626;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-blue: var(--blue);
+  --color-blue-dark: var(--blue-dark);
+  --color-blue-light: var(--blue-light);
+  --color-accent: var(--accent);
+  --color-win: var(--win);
+  --color-draw: var(--draw);
+  --color-loss: var(--loss);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/*
+ * Tailwind v4 declares `@layer theme, base, components, utilities;` and its
+ * own utility classes (bg-*, text-*, ...) live in the `utilities` layer.
+ * Custom classes written as plain unlayered CSS sit *outside* every named
+ * layer, which CSS Cascade Layers rules give higher priority than ANY
+ * layered rule — so an unlayered `.card { background: ... }` would always
+ * beat a utility like `bg-navy`, regardless of source order. Putting these
+ * in `@layer components` (declared before `utilities`) keeps them
+ * overridable by utility classes, which is the behavior every usage below
+ * assumes (e.g. `className="card bg-navy"`).
+ */
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgba(10, 32, 68, 0.04);
+  }
+
+  /* Applied alongside .card on anything wrapped in a <Link> — a tasteful
+     lift + shadow + accent border on hover, the "this is clickable and
+     this app has polish" signal used across Player/Team/Tournament/Match
+     cards. */
+  .card-interactive {
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--blue) 35%, var(--border));
+    box-shadow: 0 12px 24px -12px rgba(10, 32, 68, 0.25);
+  }
+
+  .input {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--foreground);
+  }
+
+  .input:focus {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--blue) 60%, transparent);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--blue) 70%, transparent);
+  }
+
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+
+  /* Subtle diagonal-line texture for dark hero/banner sections, echoing
+     the angular motif of pro football broadcast graphics without a heavy
+     image asset or a loud gradient. */
+  .hero-pattern {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+  }
+
+  .hero-pattern::before {
+    content: "";
+    position: absolute;
+    inset: -20% -10%;
+    background-image: repeating-linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 64px
+    );
+    pointer-events: none;
+  }
+
+  .hero-pattern::after {
+    content: "";
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 60%;
+    height: 160%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-pattern > * {
+    position: relative;
+  }
+}

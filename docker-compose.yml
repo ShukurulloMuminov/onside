@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: onside_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: onside
+      POSTGRES_USER: onside
+      POSTGRES_PASSWORD: onside
+    ports:
+      - "5434:5432"
+    volumes:
+      - onside_pgdata:/var/lib/postgresql/data
+
+volumes:
+  onside_pgdata:

@@ -1,0 +1,74 @@
+# Explicit project name so every resource (volumes, network, container
+# names) gets an `onside-prod_*` prefix — keeps this stack fully isolated
+# from ../docker-compose.yml's dev Postgres, which uses bare `onside_*`
+# names under the default (directory-name-derived) project. Without this,
+# both compose files resolve to the same volume names and silently share
+# a database when run from the same host/project directory.
+name: onside-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-onside}
+      POSTGRES_USER: ${POSTGRES_USER:-onside}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - onside_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-onside}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      # Overrides whatever DATABASE_URL is in backend/.env — db's hostname
+      # inside the compose network is always the service name, and the
+      # password lives in one place (this file's .env) instead of two.
+      DATABASE_URL: postgres://${POSTGRES_USER:-onside}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-onside}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - onside_media:/app/media
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_DJANGO_ORIGIN: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in .env, e.g. https://onside.uz}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+    restart: unless-stopped
+    environment:
+      # Server-side only — the frontend container talks to Django over the
+      # internal compose network, never through the public domain/Caddy.
+      DJANGO_API_URL: http://backend:8000/api/v1
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${PUBLIC_ORIGIN_HOST:?set PUBLIC_ORIGIN_HOST in .env, e.g. onside.uz}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  onside_pgdata:
+  onside_media:
+  caddy_data:
+  caddy_config:
